@@ -1,28 +1,27 @@
 <?php
-
-// connect
-$m = new MongoClient();
-
-// select a database
-$db = $m->comedy;
-
-// select a collection (analogous to a relational database's table)
-$collection = $db->cartoons;
-
-// add a record
-$document = array( "title" => "Calvin and Hobbes", "author" => "Bill Watterson" );
-$collection->insert($document);
-
-// add another record, with a different "shape"
-$document = array( "title" => "XKCD", "online" => true );
-$collection->insert($document);
-
-// find everything in the collection
-$cursor = $collection->find();
-
-// iterate through the results
-foreach ($cursor as $document) {
-    echo $document["title"] . "\n";
+$mysqli = new mysqli("localhost", "web", "tseug1", "it350");
+if ($mysqli->connect_errno) {
+    echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 }
 
+if (!$mysqli->query("DROP TABLE IF EXISTS test") ||
+    !$mysqli->query("CREATE TABLE test(id INT)") ||
+    !$mysqli->query("INSERT INTO test(id) VALUES (1), (2), (3)")) {
+    echo "Table creation failed: (" . $mysqli->errno . ") " . $mysqli->error;
+}
+
+$res = $mysqli->query("SELECT id FROM test ORDER BY id ASC");
+
+echo "Reverse order...\n";
+for ($row_no = $res->num_rows - 1; $row_no >= 0; $row_no--) {
+    $res->data_seek($row_no);
+    $row = $res->fetch_assoc();
+    echo " id = " . $row['id'] . "\n";
+}
+
+echo "Result set order...\n";
+$res->data_seek(0);
+while ($row = $res->fetch_assoc()) {
+    echo " id = " . $row['id'] . "\n";
+}
 ?>
